@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m%iootc7x21$+%h0h0ht)850i&11p%i=pzynz_2bdq4(9tu4zr'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -122,10 +127,20 @@ STATIC_URL = 'static/'
 
 
 # Django Rest Framework
-
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
     'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 }
+
+# Geo Name
+GEO_NAME_API_USERNAME = os.getenv('GEO_NAME_API_USERNAME')
+
+# Gmail credentials
+GOOGLE_USERNAME = os.getenv('GOOGLE_USERNAME')
+GOOGLE_PASSWORD = os.getenv('GOOGLE_PASSWORD')
+
+# Celery
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_TASK_DEFAULT_QUEUE = os.getenv('CELERY_TASK_DEFAULT_QUEUE')
