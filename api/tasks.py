@@ -153,7 +153,7 @@ def fetch_emails() -> None:
                 #     "location": subject,
                 #     "employee_email": sender
                 # })
-                retrieve_and_save_location_details(subject, sender)
+                retrieve_and_save_location_details(sender, subject)
 
     mail.close()
     mail.logout()
