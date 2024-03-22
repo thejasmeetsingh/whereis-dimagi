@@ -31,6 +31,9 @@ class Employee(BaseModel):
     email = models.EmailField(unique=True)
     badge = models.CharField(max_length=3, choices=BadgeChoices.get_values())
 
+    def __str__(self):
+        return self.email
+
 
 class Location(BaseModel):
     """
@@ -60,3 +63,6 @@ class Location(BaseModel):
 
     class Meta:
         ordering = ("-created_at",)
+
+    def __str__(self):
+        return self.name
