@@ -71,11 +71,11 @@ def retrieve_and_save_location_details(employee_email: str, location: str) -> No
     payload = {}
     headers = {}
 
-    response = requests.request("GET", url, headers=headers, data=payload).json()
+    response = requests.request("GET", url, headers=headers, data=payload)
     location_detail = dict()
 
     if response.status_code == status_codes.HTTP_200_OK:
-        location_detail = process_location_data(response)
+        location_detail = process_location_data(response.json())
 
     if not location_detail:
         location_detail.update({
@@ -94,11 +94,12 @@ def retrieve_and_save_location_details(employee_email: str, location: str) -> No
     # Create a location record
     Location.objects.create(
         employee=employee,
-        geo_name_api_response=response,
+        geo_name_api_response=response.json(),
         **location_detail
     )
 
-    allocate_badges.apply_async(kwargs={"employee_id": str(employee.id)})
+    # allocate_badges.apply_async(kwargs={"employee_id": str(employee.id)})
+    allocate_badges(employee_id=str(employee.id))
 
 
 @app.task
@@ -148,10 +149,11 @@ def fetch_emails() -> None:
                 if isinstance(subject, bytes):
                     subject = subject.decode(encoding or 'utf-8')
 
-                retrieve_and_save_location_details.apply_async(kwargs={
-                    "location": subject,
-                    "employee_email": sender
-                })
+                # retrieve_and_save_location_details.apply_async(kwargs={
+                #     "location": subject,
+                #     "employee_email": sender
+                # })
+                retrieve_and_save_location_details(subject, sender)
 
     mail.close()
     mail.logout()
