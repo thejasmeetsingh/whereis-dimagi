@@ -72,6 +72,9 @@ def retrieve_and_save_location_details(employee_email: str, location: str) -> No
     headers = {}
 
     response = requests.request("GET", url, headers=headers, data=payload)
+
+    logger.info("Called Geo Name API, Status Code: %s", response.status_code)
+
     location_detail = dict()
 
     if response.status_code == status_codes.HTTP_200_OK:
@@ -98,8 +101,9 @@ def retrieve_and_save_location_details(employee_email: str, location: str) -> No
         **location_detail
     )
 
-    # allocate_badges.apply_async(kwargs={"employee_id": str(employee.id)})
-    allocate_badges(employee_id=str(employee.id))
+    logger.info("Created records in DB")
+
+    allocate_badges.apply_async(kwargs={"employee_id": str(employee.id)})
 
 
 @app.task
@@ -133,7 +137,7 @@ def fetch_emails() -> None:
         status, data = mail.fetch(num, '(RFC822)')
         if status != 'OK':
             logger.error("ERROR getting message %s", num.decode('utf-8'))
-            return
+            continue
 
         msg = email.message_from_bytes(data[0][1])
 
@@ -144,16 +148,17 @@ def fetch_emails() -> None:
         # Check if the sender's email domain matches the allowed domains
         for allowed_domain in allowed_domains:
             if sender.endswith(f"@{allowed_domain}"):
+                logger.info("Received an email from %s", sender)
+
                 # Decode email subject
                 subject, encoding = decode_header(msg["Subject"])[0]
                 if isinstance(subject, bytes):
                     subject = subject.decode(encoding or 'utf-8')
 
-                # retrieve_and_save_location_details.apply_async(kwargs={
-                #     "location": subject,
-                #     "employee_email": sender
-                # })
-                retrieve_and_save_location_details(sender, subject)
+                retrieve_and_save_location_details.apply_async(kwargs={
+                    "location": subject,
+                    "employee_email": sender
+                })
 
     mail.close()
     mail.logout()
